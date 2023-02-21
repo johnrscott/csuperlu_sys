@@ -1,6 +1,6 @@
-use crate::csuperlu_sys::options::superlu_options_t;
-use crate::csuperlu_sys::stat::SuperLUStat_t;
-use crate::csuperlu_sys::super_matrix::c_SuperMatrix;
+use crate::options::superlu_options_t;
+use crate::stat::SuperLUStat_t;
+use crate::super_matrix::c_SuperMatrix;
 use libc;
 
 #[repr(C)]

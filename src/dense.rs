@@ -1,4 +1,4 @@
-use crate::csuperlu_sys::super_matrix::{c_SuperMatrix, Dtype_t, Mtype_t, Stype_t};
+use crate::super_matrix::{c_SuperMatrix, Dtype_t, Mtype_t, Stype_t};
 use libc;
 use std::mem::MaybeUninit;
 
