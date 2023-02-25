@@ -9,4 +9,3 @@ libc = "0.2.0"
 
 [build-dependencies]
 cmake = "0.1"
-bindgen = "0.53.1"
