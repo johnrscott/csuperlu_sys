@@ -43,11 +43,15 @@ fn main() {
     // Builds the project in the directory located in `libfoo`, installing it
     // into $OUT_DIR
     let dst = Config::new("superlu-5.3.0")
-	// Try to link with the system libblas
+    // Try to link with the system libblas. There is also an option to link
+    // with an internally bundled BLAS, but there is a warning that this may
+    // be very slow (see superlu-5.3.0/README.
         .define("TPL_BLAS_LIBRARIES", "blas")
         .build();
 
-    // You can link to the native dynamic libblas like this
+    // If you link to an external BLAS library, you also need to specify which
+    // one here. TODO: do some research into what BLAS version is present/how to
+    // give the user options.
     println!("cargo:rustc-link-lib=dylib=blas");
     
     // Is there any way this could find the wrong SuperLU?
