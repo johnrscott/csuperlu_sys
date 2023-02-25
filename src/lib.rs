@@ -1,15 +1,5 @@
-//! The C module contains the low-level interface to the SuperLU library.
-//!
-//! All functions that interface directly with SuperLU have the same names
-//! as the corresponding SuperLU functions, with an additional c_ prepended
-//! to the name.
-//!
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 
-pub mod comp_col;
-pub mod dense;
-pub mod expert_driver;
-pub mod options;
-pub mod simple_driver;
-pub mod stat;
-pub mod super_matrix;
-pub mod super_node;
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
