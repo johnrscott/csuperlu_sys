@@ -37,27 +37,29 @@ impl ParseCallbacks for MacroCallback {
 }
 
 fn main() {
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // Builds the project in the directory located in `libfoo`, installing it
     // into $OUT_DIR
-    // let dst = cmake::build("superlu-5.3.0");
+    let dst = cmake::build("superlu-5.3.0");
 
-    // println!("cargo:rustc-link-search=native={}", dst.display());
-    // println!("cargo:rustc-link-lib=static=foo");
+    // Is there any way this could find the wrong SuperLU?
+    println!("cargo:rustc-link-search=native={}", dst.join("build/SRC").display());
+    println!("cargo:rustc-link-lib=static=superlu");
     
-    // println!("cargo:rustc-link-lib=superlu");
-
     let macros = Arc::new(RwLock::new(HashSet::new()));
     
     let bindings = bindgen::Builder::default()
+        .header("superlu-5.3.0/SRC/slu_sdefs.h")
         .header("superlu-5.3.0/SRC/slu_ddefs.h")
+        .header("superlu-5.3.0/SRC/slu_cdefs.h")
+        .header("superlu-5.3.0/SRC/slu_zdefs.h")
         .parse_callbacks(Box::new(MacroCallback {macros: macros.clone()}))
         .generate()
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
