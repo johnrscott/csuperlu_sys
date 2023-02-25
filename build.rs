@@ -1,29 +1,57 @@
 extern crate bindgen;
     
-use std::env;
+use std::collections::HashSet;
+use std::sync::RwLock;
+use std::{env, sync::Arc};
 use std::path::PathBuf;
 
+use bindgen::callbacks::{MacroParsingBehavior, ParseCallbacks};
+
+// Added as described here: "https://github.com/rust-lang/rust-bindgen/
+// issues/687#issuecomment-416537395" to handle issues with FP_NAN
+// etc.
+#[derive(Debug)]
+struct MacroCallback {
+    macros: Arc<RwLock<HashSet<String>>>,
+}
+
+impl ParseCallbacks for MacroCallback {
+    fn will_parse_macro(&self, name: &str) -> MacroParsingBehavior {
+        self.macros.write().unwrap().insert(name.into());
+
+        if name == "FP_NAN" {
+            return MacroParsingBehavior::Ignore
+        } else if name == "FP_INFINITE" {
+            return MacroParsingBehavior::Ignore
+        } else if name == "FP_ZERO" {
+            return MacroParsingBehavior::Ignore
+        } else if name == "FP_SUBNORMAL" {
+            return MacroParsingBehavior::Ignore
+        } else if name == "FP_NORMAL" {
+            return MacroParsingBehavior::Ignore
+        }
+
+	
+        MacroParsingBehavior::Default
+    }
+}
+
 fn main() {
-    // Tell cargo to look for shared libraries in the specified directory
-    //println!("cargo:rustc-link-search=/path/to/lib");
 
-    // Link to superlu 
-    println!("cargo:rustc-link-lib=superlu");
+    // Builds the project in the directory located in `libfoo`, installing it
+    // into $OUT_DIR
+    // let dst = cmake::build("superlu-5.3.0");
 
-    // Tell cargo to invalidate the built crate whenever the wrapper changes
-    //println!("cargo:rerun-if-changed=wrapper.h");
+    // println!("cargo:rustc-link-search=native={}", dst.display());
+    // println!("cargo:rustc-link-lib=static=foo");
+    
+    // println!("cargo:rustc-link-lib=superlu");
 
-    // The bindgen::Builder is the main entry point
-    // to bindgen, and lets you build up options for
-    // the resulting bindings.
+    let macros = Arc::new(RwLock::new(HashSet::new()));
+    
     let bindings = bindgen::Builder::default()
-        // The input header we would like to generate
-        // bindings for.
         .header("superlu-5.3.0/SRC/slu_ddefs.h")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Finish the builder and generate the bindings.
+        .parse_callbacks(Box::new(MacroCallback {macros: macros.clone()}))
         .generate()
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
