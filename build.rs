@@ -6,6 +6,7 @@ use std::{env, sync::Arc};
 use std::path::PathBuf;
 
 use bindgen::callbacks::{MacroParsingBehavior, ParseCallbacks};
+use cmake::Config;
 
 // Added as described here: "https://github.com/rust-lang/rust-bindgen/
 // issues/687#issuecomment-416537395" to handle issues with FP_NAN
@@ -41,8 +42,14 @@ fn main() {
 
     // Builds the project in the directory located in `libfoo`, installing it
     // into $OUT_DIR
-    let dst = cmake::build("superlu-5.3.0");
+    let dst = Config::new("superlu-5.3.0")
+	// Try to link with the system libblas
+        .define("TPL_BLAS_LIBRARIES", "blas")
+        .build();
 
+    // You can link to the native dynamic libblas like this
+    println!("cargo:rustc-link-lib=dylib=blas");
+    
     // Is there any way this could find the wrong SuperLU?
     println!("cargo:rustc-link-search=native={}", dst.join("build/SRC").display());
     println!("cargo:rustc-link-lib=static=superlu");
