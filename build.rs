@@ -46,6 +46,9 @@ fn main() {
     // Try to link with the system libblas. There is also an option to link
     // with an internally bundled BLAS, but there is a warning that this may
     // be very slow (see superlu-5.3.0/README.
+    // Note: this is not currently working -- on a system with BLAS installed
+    // (sudo apt install libblas-dev), this option is ignored and the internal
+    // BLAS is used instead.
         .define("TPL_BLAS_LIBRARIES", "blas")
         .build();
 
