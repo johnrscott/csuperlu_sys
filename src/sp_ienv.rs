@@ -1,3 +1,11 @@
+//! SuperLU performance tuning
+//!
+//! This module exposes the performance-tuning parameters of SuperLU,
+//! which allow the user to specify parameters that relate closely to
+//! the computer architecture or the types of systems being solved.
+//!
+//! This function has been moved out of the superlu C code in order to
+//! allow access by rust functions. 
 
 /// Return performance-tuning parameters to the SuperLU library routines
 ///
@@ -5,6 +13,10 @@
 /// commented out, and is replaced by this function when the csuperlu_sys
 /// library is linked. Below is the documentation copied directly from the
 /// superlu source.
+///
+/// Note that the example values used for these parameters are different
+/// for the examples. To make the examples in the superlu user guide work,
+/// see sp_ienv in superlu-5.3.0/EXAMPLES/
 ///
 /// # Purpose   
 ///
