@@ -7,6 +7,7 @@
 //! This function has been moved out of the superlu C code in order to
 //! allow access by rust functions.
 
+#[derive(Copy, Clone)]
 pub struct TuningParams{
     pub panel_size: usize,
     /// When the elimination tree is constructed,
@@ -53,6 +54,15 @@ impl TuningParams {
 }
 
 static mut tuning_params: TuningParams = TuningParams::new();
+
+pub unsafe fn get_tuning_params() -> TuningParams {
+    tuning_params
+}
+
+pub unsafe fn set_tuning_params(new_params: TuningParams) {
+    tuning_params = new_params;
+}
+
 
 /// Return performance-tuning parameters to the SuperLU library routines
 ///
