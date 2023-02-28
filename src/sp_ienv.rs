@@ -1,11 +1,12 @@
 
 /// Return performance-tuning parameters to the SuperLU library routines
 ///
-/// Note: the sp_ienv C function in the superlu-5.3.0/SRC/ tree is
-/// commented out, and is replaced by this function.
+/// The sp_ienv C function in superlu-5.3.0/SRC/sp_ienv.c is
+/// commented out, and is replaced by this function when the csuperlu_sys
+/// library is linked. Below is the documentation copied directly from the
+/// superlu source.
 ///
 /// # Purpose   
-/// 
 ///
 /// sp_ienv() is inquired to choose machine-dependent parameters for the
 /// local environment. See ISPEC for a description of the parameters.   
@@ -17,7 +18,6 @@
 /// and problem size information in the arguments.   
 ///
 /// # Arguments   
-/// 
 ///
 /// ISPEC   (input) int
 ///         Specifies the parameter to be returned as the value of SP_IENV.   
@@ -34,7 +34,7 @@
 ///	    = 6: the estimated fills factor for L and U, compared with A;
 ///	    = 7: the maximum size for a supernode in ILU.
 ///	    
-///(SP_IENV) (output) int
+/// (SP_IENV) (output) int
 ///         >= 0: the value of the parameter specified by ISPEC   
 ///         < 0:  if SP_IENV = -k, the k-th argument had an illegal value. 
 #[no_mangle]
