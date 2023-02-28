@@ -5,7 +5,54 @@
 //! the computer architecture or the types of systems being solved.
 //!
 //! This function has been moved out of the superlu C code in order to
-//! allow access by rust functions. 
+//! allow access by rust functions.
+
+pub struct TuningParams{
+    pub panel_size: usize,
+    /// When the elimination tree is constructed,
+    /// there may be supernodes of very small size.
+    /// This are grouped together (relaxation) into
+    /// artificial supernodes that are larger, but
+    /// contain some zeros. This parameter sets the
+    /// cutoff at which this grouping will occur,
+    /// which sets the minimum size of the supernodes.
+    pub relaxation_param: usize,
+    pub max_supernode_size: usize,
+    pub min_row_2d_block: usize,
+    pub min_col_2d_block: usize,
+    pub estimated_fills: usize,
+    pub max_ilu_supernode_size: usize,
+}
+
+impl TuningParams {
+    const fn new() -> Self {
+	// TODO: check these match the superlu defaults
+	Self {
+	    panel_size: 20,
+	    relaxation_param: 10,
+	    max_supernode_size: 200,
+	    min_row_2d_block: 200,
+	    min_col_2d_block: 100,
+	    estimated_fills: 30,
+	    max_ilu_supernode_size: 10,
+	}
+    }
+
+    fn sp_ienv(&self, ispec: libc::c_int) -> libc::c_int {
+	(match ispec {
+	    1 => self.panel_size,
+	    2 => self.relaxation_param,
+	    3 => self.max_supernode_size,
+	    4 => self.min_row_2d_block,
+	    5 => self.min_col_2d_block,
+            6 => self.estimated_fills,
+            7 => self.max_ilu_supernode_size,
+	    _ => panic!("Invalid ispec in (rust) sp_ienv")
+	}) as libc::c_int
+    }
+}
+
+static mut tuning_params: TuningParams = TuningParams::new();
 
 /// Return performance-tuning parameters to the SuperLU library routines
 ///
@@ -52,14 +99,7 @@
 #[no_mangle]
 pub extern "C" fn sp_ienv(ispec: libc::c_int) -> libc::c_int {
     println!("Hello from conterfeit sp_ienv!");
-    match ispec {
-	1 => 20,
-	2 => 10,
-	3 => 200,
-	4 => 200,
-	5 => 100,
-        6 => 30,
-        7 => 10,
-	_ => panic!("Invalid ispec in (rust) sp_ienv")
+    unsafe {
+	tuning_params.sp_ienv(ispec)
     }
 }
