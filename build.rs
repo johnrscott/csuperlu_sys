@@ -45,11 +45,12 @@ fn main() {
     let dst = Config::new("superlu-5.3.0")
     // Try to link with the system libblas. There is also an option to link
     // with an internally bundled BLAS, but there is a warning that this may
-    // be very slow (see superlu-5.3.0/README.
-    // Note: this is not currently working -- on a system with BLAS installed
-    // (sudo apt install libblas-dev), this option is ignored and the internal
-    // BLAS is used instead.
-        .define("TPL_BLAS_LIBRARIES", "blas")
+    // be very slow (see superlu-5.3.0/README. You can also specify openblas
+    // here (sudo apt install libopenblas-dev)
+        .define("TPL_BLAS_LIBRARIES", "openblas")
+    // To use the specified blaslib, make sure you also set this variable (see
+    // the cmake file logic)
+	.define("enable_internal_blaslib", "no")
         .build();
 
     // If you link to an external BLAS library, you also need to specify which
