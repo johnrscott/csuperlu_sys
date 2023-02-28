@@ -1,11 +1,83 @@
+//! SuperLU performance tuning
+//!
+//! This module exposes the performance-tuning parameters of SuperLU,
+//! which allow the user to specify parameters that relate closely to
+//! the computer architecture or the types of systems being solved.
+//!
+//! This function has been moved out of the superlu C code in order to
+//! allow access by rust functions.
+
+#[derive(Debug, Copy, Clone)]
+pub struct TuningParams{
+    pub panel_size: usize,
+    /// When the elimination tree is constructed,
+    /// there may be supernodes of very small size.
+    /// This are grouped together (relaxation) into
+    /// artificial supernodes that are larger, but
+    /// contain some zeros. This parameter sets the
+    /// cutoff at which this grouping will occur,
+    /// which sets the minimum size of the supernodes.
+    pub relaxation_param: usize,
+    pub max_supernode_size: usize,
+    pub min_row_2d_block: usize,
+    pub min_col_2d_block: usize,
+    pub estimated_fills: usize,
+    pub max_ilu_supernode_size: usize,
+}
+
+impl TuningParams {
+    const fn new() -> Self {
+	// TODO: check these match the superlu defaults
+	Self {
+	    panel_size: 20,
+	    relaxation_param: 10,
+	    max_supernode_size: 200,
+	    min_row_2d_block: 200,
+	    min_col_2d_block: 100,
+	    estimated_fills: 30,
+	    max_ilu_supernode_size: 10,
+	}
+    }
+
+    fn sp_ienv(&self, ispec: libc::c_int) -> libc::c_int {
+	(match ispec {
+	    1 => self.panel_size,
+	    2 => self.relaxation_param,
+	    3 => self.max_supernode_size,
+	    4 => self.min_row_2d_block,
+	    5 => self.min_col_2d_block,
+            6 => self.estimated_fills,
+            7 => self.max_ilu_supernode_size,
+	    _ => panic!("Invalid ispec in (rust) sp_ienv")
+	}) as libc::c_int
+    }
+}
+
+static mut tuning_params: TuningParams = TuningParams::new();
+
+/// Read the current SuperLU performance-tuning parameters
+pub unsafe fn get_tuning_params() -> TuningParams {
+    tuning_params
+}
+
+/// Set new SuperLU performance-tuning parameters
+pub unsafe fn set_tuning_params(new_params: TuningParams) {
+    tuning_params = new_params;
+}
+
 
 /// Return performance-tuning parameters to the SuperLU library routines
 ///
-/// Note: the sp_ienv C function in the superlu-5.3.0/SRC/ tree is
-/// commented out, and is replaced by this function.
+/// The sp_ienv C function in superlu-5.3.0/SRC/sp_ienv.c is
+/// commented out, and is replaced by this function when the csuperlu_sys
+/// library is linked. Below is the documentation copied directly from the
+/// superlu source.
+///
+/// Note that the example values used for these parameters are different
+/// for the examples. To make the examples in the superlu user guide work,
+/// see sp_ienv in superlu-5.3.0/EXAMPLES/
 ///
 /// # Purpose   
-/// 
 ///
 /// sp_ienv() is inquired to choose machine-dependent parameters for the
 /// local environment. See ISPEC for a description of the parameters.   
@@ -17,7 +89,6 @@
 /// and problem size information in the arguments.   
 ///
 /// # Arguments   
-/// 
 ///
 /// ISPEC   (input) int
 ///         Specifies the parameter to be returned as the value of SP_IENV.   
@@ -34,20 +105,13 @@
 ///	    = 6: the estimated fills factor for L and U, compared with A;
 ///	    = 7: the maximum size for a supernode in ILU.
 ///	    
-///(SP_IENV) (output) int
+/// (SP_IENV) (output) int
 ///         >= 0: the value of the parameter specified by ISPEC   
 ///         < 0:  if SP_IENV = -k, the k-th argument had an illegal value. 
 #[no_mangle]
 pub extern "C" fn sp_ienv(ispec: libc::c_int) -> libc::c_int {
     println!("Hello from conterfeit sp_ienv!");
-    match ispec {
-	1 => 20,
-	2 => 10,
-	3 => 200,
-	4 => 200,
-	5 => 100,
-        6 => 30,
-        7 => 10,
-	_ => panic!("Invalid ispec in (rust) sp_ienv")
+    unsafe {
+	tuning_params.sp_ienv(ispec)
     }
 }

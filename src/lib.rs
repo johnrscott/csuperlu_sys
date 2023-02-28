@@ -4,4 +4,6 @@
 
 mod sp_ienv;
 
+pub use sp_ienv::{TuningParams, get_tuning_params, set_tuning_params};
+
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
